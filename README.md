@@ -38,3 +38,10 @@ This update fixes the form submission bug where Save Concert, savings, expenses 
 Upload the eight files in this folder to the repository root and replace the existing files, then commit. Alternatively edit `app.js` in GitHub: replace every `new FormData(f)` with `new FormData(e.currentTarget)`. After deployment refresh and test with a brand-new concert.
 
 Artist/event lookup is **not** yet implemented. Scheduled push notifications are also not yet implemented.
+
+## v1.3 — Date-only concerts and event changes
+- Concert date is mandatory; start time is optional. When blank, ENCORE shows Time TBA and exports an all-day calendar entry.
+- On any concert, choose Edit to set Scheduled, Rescheduled, Postponed or Cancelled, and update date, venue or city.
+- ENCORE automatically records local history of changes made inside the app. It does **not** currently check event providers or send alerts when a promoter changes an event. Live monitoring and push notifications need an API/backend service.
+- Existing concert data remains stored under the original `encore-v1` localStorage key. Before replacing the app, use Settings → Export backup.
+- Upload the extracted files to the repository root and allow GitHub Pages to redeploy. On iOS, close/reopen the installed app to refresh its service worker.
