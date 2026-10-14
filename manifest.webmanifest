@@ -1,0 +1,1 @@
+{"name":"ENCORE — Your concert companion","short_name":"ENCORE","description":"Track concerts, countdowns, expenses and savings","start_url":"./","scope":"./","display":"standalone","background_color":"#111019","theme_color":"#111019","icons":[{"src":"icon.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}
