@@ -30,3 +30,11 @@ GitHub Pages deployment menus may change. Another static HTTPS host works too.
 - Calendar export creates an .ics file; it does not continuously sync changes.
 - Savings are manually recorded, not moved between bank accounts. Savings calculations spread remaining target over remaining contribution periods, rounding up to cents.
 - No payment credentials or API keys are required for this version.
+
+## v1.2 Save Concert fix
+This update fixes the form submission bug where Save Concert, savings, expenses and reminder submissions read from a reused variable that no longer referenced the submitted form. The fix reads `e.currentTarget` instead. It also permits decimal amounts, adds date validation, and bumps the cache version. Existing data in `encore-v1` localStorage is preserved.
+
+### To update GitHub
+Upload the eight files in this folder to the repository root and replace the existing files, then commit. Alternatively edit `app.js` in GitHub: replace every `new FormData(f)` with `new FormData(e.currentTarget)`. After deployment refresh and test with a brand-new concert.
+
+Artist/event lookup is **not** yet implemented. Scheduled push notifications are also not yet implemented.
