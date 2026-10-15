@@ -1,0 +1,11 @@
+{
+  "name": "encore-pwa",
+  "version": "1.8.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "generate-secrets": "node scripts/generate-secrets.mjs"
+  },
+  "dependencies": { "web-push": "^3.6.7" }
+}

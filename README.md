@@ -1,21 +1,17 @@
-# ENCORE v1.7 — Official Event Links + Better Melbourne Search
+# ENCORE v1.8 — Background monitoring & Web Push
 
-This preserves ENCORE v1.5's interface and local concert storage, building on the working v1.6.1 backend and the repaired Ticketek scraper.
+ENCORE is a personal concert-tracking PWA. v1.8 preserves the established v1.5-v1.7 interface while adding:
 
-## What's new
-- A single **Import official event link** field under **Add concert** supports exact Ticketmaster event URLs, Ticketek events, and best-effort public event pages from QPAC/QTIX, Oztix, Moshtix, Eventbrite, Frontier Touring, Live Nation and On the Banks.
-- The importer fetches recognised sites on Vercel using a strict HTTPS host allowlist and no redirects. It extracts public schema.org Event metadata, event-page metadata and limited visible text. Unsupported, blocked and incomplete pages offer a manual entry fallback with the original link retained. **It is not a guaranteed universal scraper.**
-- QPAC/QTIX best-effort parsing recognises date, gates-open time, images, an explicitly stated standing GA designation, and venue. Gates-open time is kept **separate from show start time**. If a QPAC page blocks access, the backend tries its corresponding official QTIX/QPAC listing.
-- Ticketmaster searches now use Australia filtering and retry more broadly when exact city returns too few results. Venue suburbs including **Docklands** are prioritised for a **Melbourne** search. Exact Ticketmaster event-link import is a reliable alternative if search misses an event.
-- Ticketek search cards now use available promotional images and show dates, while excluding waitlist-only listings that lack scheduled dates. The repaired Ticketek scraper ID `c6104e15-19a4-485c-8572-d57e7b1a187f` remains connected.
-- Fixed metadata persistence: doors-open time, support acts, provider and source are retained after saving a concert imported from an official page.
+- Optional private Supabase cloud backup via a long personal access token.
+- Daily Vercel cron monitoring of saved Ticketmaster, Ticketek and supported official event-link concerts.
+- Browser Web Push using VAPID (supported on iOS 16.4+ when installed as a Home Screen app).
+- Once/daily/weekly/off countdown reminders, opt-in savings reminders and event change alerts.
+- Provider changes are recorded for review — not silently applied to local concert records.
 
-## Important boundaries
-- The importer **does not confirm that all ticket types, venue maps, or set times are complete**. Verify the event information using the official event page and your ticket before saving.
-- A page may block bots, change its layout, lack machine-readable dates, or show several performances; the import can return partial results or fail. The manual-entry fallback is intentional.
-- QPAC/other provider **background monitoring is not yet active**. Only existing Ticketmaster checks run when ENCORE is open.
-- Concerts, savings and expenses still live in the browser's localStorage. Export a JSON backup before deployment. Hosting and Vercel do not sync user records.
-- No extra API keys are needed. **Never place any API key or `.env` file in GitHub.**
-- Vercel API endpoints are public and use your provider quota; the strict allowlist mitigates SSRF but does not replace authentication, caching and quotas for a multi-user product.
+**START HERE:** `SETUP_GUIDE.md` has beginner instructions for Supabase, keys, GitHub, Vercel and iPhone.
 
-Follow `SETUP_GUIDE.md` for step-by-step installation and test links.
+**SECURITY:** Do not commit your Vercel environment variables, `ENCORE_SYNC_TOKEN`, `VAPID_PRIVATE_KEY`, or `SUPABASE_SECRET_KEY`. `SUPABASE_SETUP.sql` is safe to commit. The new Supabase secret keys begin with `sb_secret_` and should only be used by Vercel.
+
+**LIMITS:** Vercel Hobby cron = daily; roughly one-hour execution window. No precise per-concert time scheduling. Device data is local-first with a last-write-wins cloud copy; the app is single-person and does not yet have user-account sign-in. This isn't intended as a public multi-user SaaS.
+
+**Tests:** `npm.cmd install`, then `npm.cmd test` on Windows. Current test suite uses Node's built-in test runner. No personal credentials required for those tests.

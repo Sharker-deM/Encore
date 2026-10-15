@@ -3,3 +3,6 @@
 
 /* ENCORE v1.6: unobtrusive setlist preview inside the familiar v1.5 design */
 .setlist-results{margin-top:12px}.setlist-results details{padding:15px;border:1px solid var(--stroke);border-radius:13px;background:var(--surface);margin:10px 0}.setlist-results summary{cursor:pointer;line-height:1.6;font-size:13px}.setlist-results .linkbutton{margin-left:8px;font-size:12px}.setlist-results li{color:var(--text);font-size:13px;line-height:1.5}
+/* v1.8 subtle settings controls — preserves ENCORE v1.5 styling */
+.toggle-row{display:flex;align-items:center;gap:12px;padding:13px 1px;font-size:13px;color:var(--text);line-height:1.5}
+.toggle-row input{width:19px;height:19px;accent-color:#b38dff;flex:none}

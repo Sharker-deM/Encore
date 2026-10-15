@@ -1,0 +1,11 @@
+import crypto from 'node:crypto';
+import webpush from 'web-push';
+const vapid=webpush.generateVAPIDKeys();
+console.log('\nCopy these into Vercel Settings → Environment Variables (Production).');
+console.log('Never paste these into your GitHub repository or send them in chat.\n');
+console.log('ENCORE_SYNC_TOKEN='+crypto.randomBytes(32).toString('hex'));
+console.log('CRON_SECRET='+crypto.randomBytes(32).toString('hex'));
+console.log('VAPID_PUBLIC_KEY='+vapid.publicKey);
+console.log('VAPID_PRIVATE_KEY='+vapid.privateKey);
+console.log('VAPID_SUBJECT=mailto:YOUR_EMAIL@example.com');
+console.log('\nReplace VAPID_SUBJECT with your own email; keep the key pair together.');
