@@ -6,7 +6,13 @@ export default async function handler(req,res){
  const key=process.env.PARSE_API_KEY;
  if(!key)return respond(req,res,503,{error:'Ticketek is not configured in Vercel yet.'});
  const mode=param(req,'mode',12)||'event';
- const base='https://api.parse.bot/scraper/05e1d9ef-83cf-4147-9c44-cf6376be9e99/';
+ // Your repaired Ticketek Parse.bot scraper. Optionally override in Vercel settings.
+ const fallbackScraperId='c6104e15-19a4-485c-8572-d57e7b1a187f';
+ const scraperId=(process.env.PARSE_TICKETEK_SCRAPER_ID||fallbackScraperId).trim();
+ if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(scraperId)){
+   return respond(req,res,503,{error:'Ticketek scraper ID is invalid. Check PARSE_TICKETEK_SCRAPER_ID in Vercel.'});
+ }
+ const base=`https://api.parse.bot/scraper/${scraperId}/`; 
  let api;
  if(mode==='search'){
    const query=param(req,'query',120);
