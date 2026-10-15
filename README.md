@@ -1,63 +1,62 @@
-# ENCORE v1.4 — Your Concert Companion
+# ENCORE v1.5 — Interface redesign
 
-ENCORE is a mobile-first Progressive Web App (PWA) for recording concerts, counting down, planning savings, tracking spending, viewing event artwork, recording ticket details, consulting venue charts and checking linked events for updates.
+**ENCORE** is a personal, mobile-first concert-tracking PWA for GitHub Pages. It is intentionally static: no npm install or build process is needed.
 
-## Publishing to your existing GitHub Pages website
+## What changed since v1.4
 
-1. **Back up your data first:** Open the current ENCORE app > **Settings > Export backup**. Keep the downloaded JSON somewhere safe. The upgrade normally preserves existing locally stored data, but a backup is important.
-2. Extract `ENCORE-v1.4.zip` on your computer.
-3. In your **sharker-dem/Encore** GitHub repository, open **Add file > Upload files**.
-4. Upload the files *inside* the extracted ZIP directly into the repository root. The `index.html` file should appear at the top level of the repo (not inside a second nested folder).
-5. Commit the changes to `main` and wait until **Actions** shows the Pages deployment succeeded.
-6. Reload `https://sharker-dem.github.io/Encore/`. On a computer use Ctrl+Shift+R. On iPhone close and reopen the Home Screen app; if an old copy persists, refresh the Safari tab. Do not clear website data unless you have exported a backup.
-7. If you need to restore data, open **Settings > Import backup**. This replaces the browser's existing records with those from the chosen backup, so choose carefully.
+- New, more polished mobile-first home screen with a next-concert hero card, countdown, event cards and summary cards.
+- A much shorter **two-step add flow**: Find your show -> Review & Save. Only artist and date are required; time is optional.
+- With a Ticketmaster Discovery API Consumer Key, entering an artist automatically searches for events. Selecting an event fills the available date, time, venue, city, promotional image and seatmap.
+- Event-specific ticket type: Standing/GA, Reserved seat (section/row/seat), or Not sure.
+- Optional sections for artwork, map, status and notes, instead of forcing users through these for every concert.
+- Cleaner concert detail screen with Overview, Budget and Show info tabs.
+- Savings targets, automatic contribution recalculation, deposits, and itemised spending.
+- An optional seating map display with manual approximate-position pin and zoom. Automatic exact seat lookup is **not** available.
+- Manual show times/setlist notes, links to setlist.fm, and foreground Ticketmaster event-change checks.
+- Date-only calendar downloads, calendar view, automatic past-concert archive, manual archive, permanent delete, JSON export/import.
+- Fixed form submission handling and delayed search event race conditions.
 
-## Connect concert search (Ticketmaster)
+## Updating your current GitHub Pages project
 
-1. Go to https://developer.ticketmaster.com/ and sign up or sign in.
-2. Open **My Apps** in the developer portal. Find or create an app with **Discovery API** access.
-3. Copy the **Consumer Key** (the Discovery API key). Do **not** use a Consumer Secret or an unrelated private credential.
-4. In ENCORE, open **Settings > Concert lookup connection**, paste the Consumer Key, then tap **Save key on this device**.
-5. Open **Add concert**, enter an **artist** and **city**. Suggestions will load after a short pause; you can also tap **Find concerts**.
-6. Tap your exact event in the results. ENCORE fills the fields supplied by Ticketmaster: event name, date, optional time, venue, city, promo art, event link and seatmap (where provided). Check the details before saving.
+**IMPORTANT: Back up your data first.** In your existing app, open Settings -> Export backup. Keep that JSON file somewhere safe. ENCORE continues using the `encore-v1` storage key, so existing records should remain on the same browser and website.
 
-Notes: This is a front-end-only personal prototype. The Consumer Key remains in local browser storage and is not committed to GitHub, but browser network requests expose it. The proper production design uses a protected server-side proxy and rate limiting. Not every event or provider appears on Ticketmaster. Without a key, manually entered events still work.
+1. Unzip `ENCORE-v1.5-redesign.zip` on your computer.
+2. Open https://github.com/Sharker-deM/Encore and go to the repository's main Code page.
+3. Click **Add file** -> **Upload files**.
+4. Upload these eight files **directly into the repository root** (not a new folder, and not the ZIP file): `index.html`, `styles.css`, `app.js`, `sw.js`, `manifest.webmanifest`, `icon.png`, `icon.svg`, `README.md`.
+5. GitHub will identify files with the same names. Scroll to **Commit changes**, use the message `ENCORE v1.5 intuitive redesign`, and commit to `main`.
+6. Open the repository **Actions** tab and wait for the GitHub Pages deployment to succeed.
+7. Open https://sharker-dem.github.io/Encore/ and refresh. On a computer use Ctrl+Shift+R. On iPhone, close and reopen the Home Screen app; you may need to open the Safari site and refresh once for the new service worker to update.
+8. **Verify the upgrade:** Settings page should show `ENCORE v1.5` near the bottom. If it still shows the old interface, look for an incomplete deployment or old cached files. **Don't delete app data** to fix a cache problem unless you've already exported a backup.
 
-## Posters and images
+## Optional concert lookup integration
 
-- When selecting a matching Ticketmaster event, ENCORE automatically uses the best non-fallback promotional image returned by that provider.
-- **A promotional image is not guaranteed to be the actual official tour poster.** If you want the exact tour poster, obtain it from the official event/artist/promoter and paste its HTTPS image URL, or upload a personal copy from your device in the concert editor.
-- You can upload PNG, JPG, or WebP. ENCORE compresses it and stores it locally for the banner and concert cards. Large image collections can use significant browser storage; export backups and don't rely on it as permanent storage.
-- Follow the image provider's reuse terms. ENCORE does not search arbitrary image sites or bypass copyrighted-image restrictions.
+The app remains functional without any API key. To enable online event lookup:
 
-## Ticket types and seating maps
+1. Sign in or register at https://developer.ticketmaster.com/.
+2. Open your developer app and copy the **Discovery API Consumer Key** (not the Consumer Secret).
+3. In ENCORE -> Settings -> Concert discovery, paste and save the key.
+4. Tap Add, type an artist and optionally a city. Matches appear automatically after a brief pause, or tap Search concerts.
+5. Select the *correct* event. Review the autofilled date, venue and event-specific ticket layout against your actual ticket before saving.
 
-- Ticket type is selected **for each concert**, not inferred rigidly from the venue. Even Riverstage and the Fortitude Music Hall can offer different configurations.
-- Choose **Standing / General Admission**, **Reserved seating**, or **Not sure yet**. With reserved seating, enter Section/Block, Row and Seat number(s).
-- When Ticketmaster supplies an event-specific static seating map, ENCORE shows it in concert details. Otherwise you can add a seating chart's HTTPS image URL or upload an image.
-- Use the **Zoom map** control and **tap your approximate position** to place a persistent marker. The marker is manual; provider chart images do not expose individual seat coordinates, so exact seats cannot be located or verified automatically in this version.
-- If a map doesn't reflect your event's configuration, use your ticket seller's official live seating map.
+Not all artists or concerts are on Ticketmaster. The promotional event image may *not* be the exact tour poster. Upload an official poster image yourself if necessary. Venue standing/seating configurations are event-specific, and Ticketmaster's API does not guarantee enough information to choose your ticket category accurately; ENCORE asks you.
 
-## Event monitoring — current capabilities and limitations
+### API key security
 
-- **Implemented:** For concerts linked to a Ticketmaster event ID, ENCORE compares the last saved provider details with new data when the app opens (no more than once per 12 hours) and when you tap **Event watch > Check now**. It looks for event date, time, venue, city, official notes, seatmap image and status changes (e.g. cancelled or postponed). It shows proposed updates with source links; you choose **Apply updates** or **Dismiss**. Changes are logged.
-- **Not yet implemented:** Scheduled background checks while the app is closed; reliable push notifications; automatic setlist fetching and comparison; automatic extraction of confirmed doors/support/headliner set times. These need more providers and a backend scheduler. ENCORE has **Setlists & show times** with manual time fields, notes and web searches for checking official announcements or setlist.fm.
-- Event monitoring only reflects the ticket provider's supplied data; it cannot guarantee detection of all announcements.
+The Consumer Key is saved in your browser's local storage and is not embedded in repository source files. However, browser-side API calls expose it to someone inspecting traffic; this design is a **personal prototype**, not secure server-side key storage. A production app should use a protected backend proxy with rate limiting.
 
-## Storage and privacy
+## Event-change monitoring scope
 
-- Concerts, expenses, savings, venue maps and annotations are stored in this browser's `localStorage` under `encore-v1` (preserving ENCORE v1.3 records).
-- The Ticketmaster key is separately stored under `encore-ticketmaster-consumer-key` and **not exported** in backups.
-- Your records don't sync across devices yet. Clearing web app data or reinstalling may erase records, so use **Export backup** regularly.
+For Ticketmaster-linked concerts, the app checks provider details while open (at most once per 12 hours automatically, and on demand). It looks for changes in date, time, venue, city, status and some event notes. It shows a suggested update for your review and does not silently overwrite your information.
 
-## Test checklist
+**Not implemented:** background updates while ENCORE is closed; real push notification delivery; automatic monitoring of setlists, announced set times, support acts or individual exact seats. Reminder preferences are stored only. Confirm urgent changes with the official promoter/venue/ticket seller. A backend plus additional authorised data sources are required for reliable background monitoring.
 
-- Save a date-only event and a dated/timed event.
-- Edit a concert; select reserved seating and enter block, row and seat.
-- Add an official poster image and check its home card and details banner.
-- Attach a map and tap to save a marker.
-- Save doors/support/headliner times and setlist notes.
-- If you connected the Discovery Consumer Key, select a search result and use **Event watch > Check now**.
-- Check that savings, expenses, calendar export and Archive still work.
+## Storage, privacy and backups
 
-This version was tested in Chromium with simulated Ticketmaster API responses. Live lookup depends on a valid key, network access, vendor coverage and provider response formats. iPhone-specific testing remains to be done.
+Concerts, spending, savings, images and marker locations are saved locally on the current device under browser localStorage key `encore-v1`; they are **not synced** between iPhone and desktop. Uploading the code to GitHub does not upload your personal concert data. Clearing your app/browser website data can delete saved concerts; export backups regularly. Image uploads are compressed but many images can fill local storage; export backups before major updates.
+
+## Testing
+
+Source checked with `node --check`; browser interaction tests in Chromium (with mocked provider data) covered saving an optional-time concert, editing its time, adding seating details, saving a goal/deposit/expense, show times, archiving, selecting a looked-up event and reviewing a cancellation/date/venue update. These tests do not establish whether Ticketmaster will return a particular real concert or whether iPhone Safari works identically. Test with one concert after deployment.
+
+ENCORE v1.5 · Personal PWA proof of concept
