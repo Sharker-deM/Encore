@@ -1,4 +1,6 @@
 import {param,preflight,respond,fail,getJson} from './_shared.mjs';
+// Ticketek parsing can take longer than direct Ticketmaster API requests.
+export const config = { maxDuration: 40 };
 export default async function handler(req,res){
  if(preflight(req,res))return;
  const key=process.env.PARSE_API_KEY;
@@ -17,7 +19,7 @@ export default async function handler(req,res){
    api=new URL(base+'get_event');api.searchParams.set('url',link.href);
  }else return respond(req,res,400,{error:'Unknown Ticketek operation.'});
  try{
-   const data=await getJson(api,{'X-API-Key':key});
+   const data=await getJson(api,{'X-API-Key':key},25000);
    return respond(req,res,200,{provider:'ticketek',mode,data});
  }catch(e){return fail(req,res,e);}
 }
