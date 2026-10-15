@@ -1,75 +1,65 @@
-# ENCORE v1.6 — First-time Vercel setup (Windows + GitHub + iPhone)
+# ENCORE v1.7 — Step-by-step GitHub + Vercel update
 
-## Keep your current ENCORE website
-You are not changing the URL of your iPhone app. The frontend stays at https://sharker-dem.github.io/Encore/ and your app design remains the same. The Vercel website will only be used for the event and setlist API routes.
+This guide assumes you already have:
+- GitHub repo `https://github.com/sharker-dem/Encore`
+- GitHub Pages PWA `https://sharker-dem.github.io/Encore/`
+- Vercel backend `https://encore-api-ochre.vercel.app`
+- Ticketmaster / Parse.bot / setlist.fm (and optionally Spotify) credentials already stored in Vercel.
 
-## 1. Back up before upgrading
-On the existing live ENCORE website, open Settings → Export backup, then save the JSON to your computer. If you have concerts on your iPhone, back them up **from the iPhone** as well; those records are stored separately from your computer's browser.
+## 1 — Back up data FIRST
 
-## 2. Upload the new code to GitHub
-1. Download and unzip this package.
-2. Open https://github.com/sharker-dem/Encore
-3. Open Code, then Add file → Upload files.
-4. Drag the eight root files (`index.html`, `app.js`, `styles.css`, `sw.js`, `manifest.webmanifest`, `icon.png`, `icon.svg`, `README.md`), the `SETUP_GUIDE.md`, and the entire `api` folder (including its internal `.mjs` files). Do not upload the ZIP itself. Do not upload the parent `encore-v16` folder.
-5. Scroll down and commit directly to branch `main` with message `ENCORE v1.6 backend integration`.
-6. After GitHub Pages publishes, open https://sharker-dem.github.io/Encore/ → Settings. At the bottom it should say ENCORE v1.6.
-7. If it still says v1.5, verify deployment under GitHub Actions and refresh (Ctrl+Shift+R on Windows; close/reopen Safari or the Home Screen app on iPhone).
+On each device that holds ENCORE concerts, open your existing ENCORE web app, go to **Settings → Export backup** and save the generated JSON file. It is especially important on iPhone because your phone and desktop may contain different local data. Do not delete the home-screen app or clear Safari website data.
 
-## 3. Create Vercel account
-1. Visit https://vercel.com/signup.
-2. Sign up with GitHub (simplest because your ENCORE repository is already there).
-3. Approve the GitHub connection. If asked which repositories Vercel may access, choose Only select repositories and allow `Sharker-deM/Encore`.
-4. On the dashboard select Add New → Project (or New Project).
-5. Find `Sharker-deM/Encore` and click Import. If missing, select Adjust GitHub App Permissions, grant Encore, then retry.
-6. Project name: `encore-api` (or another unique name). Framework Preset: `Other`. Root Directory: `./` (repository root). No build command is necessary.
-7. Deploy. Vercel will produce a production URL such as `https://encore-api-unique.vercel.app`. Your actual URL will be different. Keep it handy.
+## 2 — Upload the update to the existing GitHub repository
 
-## 4. Add API keys securely to Vercel
-1. In Vercel dashboard, open your new project.
-2. Choose Settings → Environment Variables (occasionally labelled Environment Variables in the project settings sidebar).
-3. For each variable below, enter the **name exactly** in the left field and paste its corresponding secret in the value field.
+1. Extract `ENCORE-v1.7-official-event-links.zip` on your computer.
+2. Open the `encore-v17` folder. Inside are `index.html`, `app.js`, `styles.css`, `sw.js`, `manifest.webmanifest`, `icon.png`, `icon.svg`, the **api** folder, and markdown documentation.
+3. Open `https://github.com/sharker-dem/Encore`, select the main branch (`main`), then choose **Add file → Upload files**.
+4. Drag the **contents** of the extracted `encore-v17` directory onto the upload area. Keep the `api` folder structure intact, so its files are under `/api/*.mjs` and not under `/encore-v17/api/` or `/api/api/`.
+5. Confirm GitHub is showing updates to `app.js`, `index.html`, `sw.js`, `/api/ticketmaster.mjs`, and the new `/api/import-event.mjs` and `/api/_event-import-parser.mjs` files.
+6. Enter the commit message `ENCORE v1.7: official event links and better searches`, then commit directly to `main`.
+7. Wait for GitHub **Actions → pages build and deployment** to finish. Your published PWA URL stays unchanged.
 
-Required for each provider:
-- `TICKETMASTER_API_KEY` — Ticketmaster Discovery Consumer Key.
-- `PARSE_API_KEY` — Parse.bot API key from your account dashboard (the Ticketek parser uses this via `X-API-Key`).
-- `SETLISTFM_API_KEY` — setlist.fm API key, already created.
+Important: the v1.7 package contains the latest repaired Ticketek API file; don't overwrite it with the older v1.6 file.
 
-Optional for Spotify Web API track lookup later:
-- `SPOTIFY_CLIENT_ID` — Spotify developer app Client ID.
-- `SPOTIFY_CLIENT_SECRET` — Spotify developer app Client Secret. Never share this or paste it into GitHub.
+## 3 — Check Vercel
 
-For now, configure Production. You may also enable Preview if you test preview deployments. Then choose Save. Environment variables only apply to deployments created **after** they're set, so go to Deployments → latest production deployment → `...` → Redeploy. If the UI labels vary, make a new GitHub commit to trigger a fresh production deployment.
+1. Sign in to Vercel and open your existing `encore-api` project (DO NOT create a second project).
+2. Open **Deployments** and wait for the newest Production deployment created by your GitHub commit to show **Ready**. If it did not deploy automatically, check that the project is connected to the repository and `main` branch before trying redeploy.
+3. Go to `https://encore-api-ochre.vercel.app/api/health`. It should say `"ok":true`, `"version":"1.7"`, and `"officialLinks":true` under providers.
+4. **No new Environment Variables needed.** Keep your existing keys unchanged, including `PARSE_API_KEY`. The repaired scraper ID is already in the bundled backend. If you set `PARSE_TICKETEK_SCRAPER_ID` in Vercel, ensure it is `c6104e15-19a4-485c-8572-d57e7b1a187f`.
 
-## 5. Confirm backend online
-Open your real Vercel address followed by `/api/health` in your browser, e.g.:
-`https://YOUR-VERCEL-ADDRESS.vercel.app/api/health`
-Expected shape: `{ "ok": true, "app": "ENCORE", "version": "1.6", "providers": { "ticketmaster": true, "ticketek": true, "setlistfm": true, "spotify": true/false } }`.
-If you see 404, confirm the `api/` folder is in repository root and the last Vercel deployment succeeded. If provider flags are false, check the environment variable names and redeploy.
+## 4 — Refresh ENCORE on Windows and iPhone
 
-## 6. Connect ENCORE to the backend
-1. Open https://sharker-dem.github.io/Encore/.
-2. Open Settings → ENCORE Vercel backend.
-3. Paste only your real Vercel site URL, e.g. `https://encore-api-unique.vercel.app`, WITHOUT `/api/health`.
-4. Tap Save backend URL, then Test connection.
-5. When connected, Add Concert → enter an artist and city. Ticketmaster suggestions appear as you type; press Search Ticketmaster + Ticketek to include Ticketek results. Selecting a Ticketek result will fetch the exact performance details. Alternately paste an official Ticketek event URL.
-6. Save your concert. In its Show info tab, tap Browse recent setlists to view setlist.fm reported concerts and Spotify song-search links.
+1. Open `https://sharker-dem.github.io/Encore/` in a desktop browser. Press Ctrl + Shift + R.
+2. Go to Settings and confirm the footer says **ENCORE v1.7**. If not, verify GitHub Actions has completed and refresh again.
+3. On iPhone, close ENCORE completely and reopen it; if the previous version is still cached, load the website in Safari and refresh there, then close/reopen your Home Screen ENCORE. Do not uninstall or clear website data until you've exported your records.
+4. Your previous Vercel backend URL should still be saved in Settings. Select **Test connection** if necessary.
 
-## Spotify developer choices
-Choose **Web API only**. Do not choose Ads API or iOS. Web Playback SDK is not needed for linking to Spotify; it would be an optional future phase involving Premium-user authentication and a playback interface. Current Spotify Web API Development Mode requires the developer to have Spotify Premium. You do NOT need Spotify keys just to open songs in the Spotify app.
+## 5 — Test Harry Styles (official Ticketmaster event)
 
-## Important current limitations
-- QPAC / QTIX direct extraction has not been implemented. Add those events manually and save a link to the official listing.
-- Ticketek parser is third-party, not official; outputs/credits/terms may change.
-- No background checks, automatic push notifications, iPhone notification permission prompts, synced database or exact seat highlighting.
-- Automatic event-change checks currently work only for Ticketmaster while ENCORE is open. Ticketek events are imported on demand. Setlist.fm is fetched when you click its button.
-- Your Vercel API URLs are publicly reachable and can spend your provider credits if abused. This personal prototype is NOT suitable for distributing widely without access control, quotas and rate limiting.
-- The GitHub repository is public. Only put source code there, never API keys.
+**Option A — Search:** Add concert → Artist `Harry Styles` → City `Melbourne` → press Search Ticketmaster + Ticketek. The 27 Nov 2026 show at Marvel Stadium in Docklands should be prioritised **if Ticketmaster's Discovery API returns the show**. The API is not guaranteed to expose every publicly listed event.
+
+**Option B — Exact link:** Add concert → Paste official event link:
+`https://www.ticketmaster.com.au/harry-styles-together-together-docklands-27-11-2026/event/25006436CFC6E40D`
+Then select **Import official event link**. Review date, venue and time and select Save concert. If an exact ID lookup fails on the API despite the public event listing existing, use manual entry and keep the link.
+
+## 6 — Test Leon Bridges at QPAC/QTIX
+
+Add concert → Paste official event link:
+`https://www.qpac.com.au/whats-on/2027/on-the-banks-leon-bridges`
+Then tap **Import official event link**. The importer will attempt to read the official page (and the corresponding QTIX page if QPAC blocks it). Review the date **28 February 2027**, venue **Cultural Forecourt, South Bank**, Standing GA and **gates 6pm**. The artist performance time is still TBA: don't treat gates-open as the artist's start time. Select Save concert. The experience is a best-effort page parser, not a guarantee; if blocked, select **Add this event manually instead**. The official URL will remain attached to the draft.
+
+## 7 — Test other providers
+
+Try an official event URL from QPAC, QTIX, Oztix, Moshtix, Eventbrite, Frontier Touring, Live Nation or On the Banks. Every imported field is editable. You should always review the date and venue. Different website formats may produce partial results. Ticketek links are routed to your repaired Parse.bot scraper, and Ticketmaster event links are routed to the official Discovery API.
 
 ## Troubleshooting
-- **ENCORE v1.5 still appears:** GitHub Pages has cached an old service worker. Check GitHub Actions, refresh the Safari version; do not delete local storage to troubleshoot without a backup.
-- **Vercel 404:** Root directory or API folder placement is incorrect. Check `api/health.mjs` exists directly in root `api/` directory.
-- **Vercel 500/502:** Open Vercel project → Logs or Deployment → Functions logs. Check credentials and provider status.
-- **API key invalid:** Verify variable names and copy the correct *key* rather than an unrelated secret. Redeploy after fixing environment variables.
-- **Search has no results:** Providers have different coverage. Ticketek may not include an event. Use a paste-in Ticketek URL or manual entry.
-- **QPAC concert:** Use Add manually and add its official event URL; don't confuse QPAC's Cultural Forecourt with its seated Concert Hall.
-- **Don't post keys/screenshots showing keys in chat.** You can share an error message or a screenshot with secrets hidden.
+
+- **Vercel health still shows 1.6.1:** Backend deployment hasn't updated; review Vercel Deployments.
+- **ENCORE Settings still shows 1.6:** GitHub Pages or the service worker is cached. Check GitHub Actions; refresh Safari/browser. Back up data before any storage reset.
+- **Search doesn't find an event:** Use the exact official Ticketmaster URL or the provider's official link. Discovery API search results may not match website listings.
+- **Importer says blocked/unavailable:** The provider's website may prohibit automated access, redirect or depend on JavaScript. The manual fallback preserves the original source link. Do not assume the site has no event.
+- **Partial data:** Fill missing artist/date manually. Start time is optional. Verify venue and ticket type.
+- **Parser key errors:** Existing Parse.bot `PARSE_API_KEY` should remain in Vercel, and the repaired scraper ID should not be replaced with the older marketplace ID.
+- **Old saved concerts missing on phone:** ENCORE localStorage is per device and app/browser context. Do not clear data; import your previously exported backup if necessary.
