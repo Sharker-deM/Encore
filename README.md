@@ -1,62 +1,39 @@
-# ENCORE v1.5 — Interface redesign
+# ENCORE v1.6 — Connected Concerts (GitHub Pages + Vercel)
 
-**ENCORE** is a personal, mobile-first concert-tracking PWA for GitHub Pages. It is intentionally static: no npm install or build process is needed.
+ENCORE v1.6 keeps the v1.5 interface and all local concert data. It adds a small Vercel backend for information retrieval. **No database, automatic push notifications or closed-app monitoring is included.**
 
-## What changed since v1.4
+## What's new
+- Back-end API key storage (Vercel environment variables) for Ticketmaster, Parse.bot Ticketek, setlist.fm and optional Spotify.
+- Ticketmaster suggestions while typing; the Search button additionally searches Ticketek (one parser credit per request), so credits are not spent for each keystroke. Ticketek search yields summary listings; selecting one calls `get_event` to obtain an actual date/venue and image, when available.
+- Paste an official Ticketek event link and import the extracted details.
+- Show Info → Browse recent setlists. Fan-reported setlists are explicitly attributed to setlist.fm; each track has a Spotify search link (which doesn't require Spotify API access). Optional server-side Spotify lookup endpoint included for a future precise-link integration.
+- ENCORE Settings → Vercel backend URL and Test connection; backend `/api/health` shows connected API sources without revealing keys.
 
-- New, more polished mobile-first home screen with a next-concert hero card, countdown, event cards and summary cards.
-- A much shorter **two-step add flow**: Find your show -> Review & Save. Only artist and date are required; time is optional.
-- With a Ticketmaster Discovery API Consumer Key, entering an artist automatically searches for events. Selecting an event fills the available date, time, venue, city, promotional image and seatmap.
-- Event-specific ticket type: Standing/GA, Reserved seat (section/row/seat), or Not sure.
-- Optional sections for artwork, map, status and notes, instead of forcing users through these for every concert.
-- Cleaner concert detail screen with Overview, Budget and Show info tabs.
-- Savings targets, automatic contribution recalculation, deposits, and itemised spending.
-- An optional seating map display with manual approximate-position pin and zoom. Automatic exact seat lookup is **not** available.
-- Manual show times/setlist notes, links to setlist.fm, and foreground Ticketmaster event-change checks.
-- Date-only calendar downloads, calendar view, automatic past-concert archive, manual archive, permanent delete, JSON export/import.
-- Fixed form submission handling and delayed search event race conditions.
+## Install carefully
+1. In existing ENCORE on the SAME device, go to Settings → Export backup; download its JSON.
+2. In the existing `Sharker-deM/Encore` GitHub repo upload **all files from this directory** to the repository root, including the complete `api` folder (not inside another `encore-v16` folder). Don't upload `.env` files or real keys. GitHub Pages continues to serve the `index.html` / `app.js` / `styles.css` files.
+3. Create a Vercel account with GitHub and import the **same** repository as a Vercel project. Use the root (`./`) as root directory, Framework Preset `Other`, and no build command. Both GitHub Pages and Vercel deploy automatically from the same repository; keep your iPhone shortcut pointed at the familiar GitHub Pages URL.
+4. On Vercel: Project → Settings → Environment Variables. Add **TICKETMASTER_API_KEY**, **PARSE_API_KEY**, **SETLISTFM_API_KEY**, and optionally **SPOTIFY_CLIENT_ID** and **SPOTIFY_CLIENT_SECRET**. Select Production (and Preview if you test previews). Redeploy your project after adding or changing environment variables.
+5. Open `https://YOUR-VERCEL-SUBDOMAIN.vercel.app/api/health`; confirm JSON with `"ok":true`. For each configured provider, its flag should be true.
+6. Open `https://sharker-dem.github.io/Encore/` and Settings → ENCORE Vercel backend; paste ONLY your Vercel domain (no `/api/health`), save and use Test connection. Now try a concert search by artist and city, Ticketek import, and Show info → Browse recent setlists.
+7. The Settings footer should say `ENCORE v1.6`. On iPhone close/reopen the home-screen app if an old service worker is still loaded; refresh the Safari URL if necessary.
 
-## Updating your current GitHub Pages project
+## Secrets and safety
+**Never commit actual API keys, Spotify client secrets, `.env` files, or personal tokens into GitHub.** Store server-side in Vercel Environment Variables. Vercel backend public endpoints still use your keys on the server and consume provider quotas when anyone calls them. This is suitable as an experimental personal project, **not a publicly scaled API**. Add authentication, request throttling, caching, quota limits and monitoring before distributing publicly. Front-end data (concerts, budgets, photos) still lives in browser localStorage (`encore-v1`), **not on Vercel**. Existing local data remains on the same website/browser when updating code.
 
-**IMPORTANT: Back up your data first.** In your existing app, open Settings -> Export backup. Keep that JSON file somewhere safe. ENCORE continues using the `encore-v1` storage key, so existing records should remain on the same browser and website.
+## Provider specifics
+- Ticketmaster discovery API returns event metadata and images. Dates/times/seating types still require ticket verification.
+- Ticketek Parse.bot **independent** API (not affiliated with Ticketek) currently publishes `search_events` (one credit) and `get_event` (three credits). It is Australia-only. City is a free-text part of the search query rather than a strict region filter, so review results. Linked Ticketek show data can change, but *automatic Ticketek changes monitoring is not yet enabled*.
+- QPAC/QTIX is not directly integrated yet. Use manual entry and link the official event page; don't assume seated tickets based on venue alone.
+- setlist.fm results are community-reported prior performances; not verified future setlists. Exact show times should come from official concert/venue/promoter listings.
+- Spotify button opens a track search in Spotify (no account connection needed). `/api/spotify-track` supports optional Web API-based exact track searches using client credentials for future work, subject to Spotify's current API restrictions. No in-app streaming/chorus playback.
+- Vercel backend is **on-demand**; it cannot notify you when the app is closed until a database, scheduled job and web push are added. The only auto-check while open remains Ticketmaster.
 
-1. Unzip `ENCORE-v1.5-redesign.zip` on your computer.
-2. Open https://github.com/Sharker-deM/Encore and go to the repository's main Code page.
-3. Click **Add file** -> **Upload files**.
-4. Upload these eight files **directly into the repository root** (not a new folder, and not the ZIP file): `index.html`, `styles.css`, `app.js`, `sw.js`, `manifest.webmanifest`, `icon.png`, `icon.svg`, `README.md`.
-5. GitHub will identify files with the same names. Scroll to **Commit changes**, use the message `ENCORE v1.5 intuitive redesign`, and commit to `main`.
-6. Open the repository **Actions** tab and wait for the GitHub Pages deployment to succeed.
-7. Open https://sharker-dem.github.io/Encore/ and refresh. On a computer use Ctrl+Shift+R. On iPhone, close and reopen the Home Screen app; you may need to open the Safari site and refresh once for the new service worker to update.
-8. **Verify the upgrade:** Settings page should show `ENCORE v1.5` near the bottom. If it still shows the old interface, look for an incomplete deployment or old cached files. **Don't delete app data** to fix a cache problem unless you've already exported a backup.
+## Quick backend tests
+- `/api/health`: JSON status and configured services, without secrets.
+- `/api/ticketmaster?artist=Leon%20Bridges&city=Brisbane`: API event search; requires Ticketmaster key.
+- `/api/ticketek?mode=search&query=Leon%20Bridges`: Ticketek artist search; requires Parse key.
+- `/api/ticketek?mode=event&url=<encoded official Ticketek show URL>`: exact performance import.
+- `/api/setlists?artist=Leon%20Bridges`: community-reported setlists.
 
-## Optional concert lookup integration
-
-The app remains functional without any API key. To enable online event lookup:
-
-1. Sign in or register at https://developer.ticketmaster.com/.
-2. Open your developer app and copy the **Discovery API Consumer Key** (not the Consumer Secret).
-3. In ENCORE -> Settings -> Concert discovery, paste and save the key.
-4. Tap Add, type an artist and optionally a city. Matches appear automatically after a brief pause, or tap Search concerts.
-5. Select the *correct* event. Review the autofilled date, venue and event-specific ticket layout against your actual ticket before saving.
-
-Not all artists or concerts are on Ticketmaster. The promotional event image may *not* be the exact tour poster. Upload an official poster image yourself if necessary. Venue standing/seating configurations are event-specific, and Ticketmaster's API does not guarantee enough information to choose your ticket category accurately; ENCORE asks you.
-
-### API key security
-
-The Consumer Key is saved in your browser's local storage and is not embedded in repository source files. However, browser-side API calls expose it to someone inspecting traffic; this design is a **personal prototype**, not secure server-side key storage. A production app should use a protected backend proxy with rate limiting.
-
-## Event-change monitoring scope
-
-For Ticketmaster-linked concerts, the app checks provider details while open (at most once per 12 hours automatically, and on demand). It looks for changes in date, time, venue, city, status and some event notes. It shows a suggested update for your review and does not silently overwrite your information.
-
-**Not implemented:** background updates while ENCORE is closed; real push notification delivery; automatic monitoring of setlists, announced set times, support acts or individual exact seats. Reminder preferences are stored only. Confirm urgent changes with the official promoter/venue/ticket seller. A backend plus additional authorised data sources are required for reliable background monitoring.
-
-## Storage, privacy and backups
-
-Concerts, spending, savings, images and marker locations are saved locally on the current device under browser localStorage key `encore-v1`; they are **not synced** between iPhone and desktop. Uploading the code to GitHub does not upload your personal concert data. Clearing your app/browser website data can delete saved concerts; export backups regularly. Image uploads are compressed but many images can fill local storage; export backups before major updates.
-
-## Testing
-
-Source checked with `node --check`; browser interaction tests in Chromium (with mocked provider data) covered saving an optional-time concert, editing its time, adding seating details, saving a goal/deposit/expense, show times, archiving, selecting a looked-up event and reviewing a cancellation/date/venue update. These tests do not establish whether Ticketmaster will return a particular real concert or whether iPhone Safari works identically. Test with one concert after deployment.
-
-ENCORE v1.5 · Personal PWA proof of concept
+All server-side routes are read-only. The Ticketek endpoint only accepts official Ticketek URLs; URLs are sent to Parse.bot, never downloaded arbitrarily by Vercel. Browser calls are cross-origin permitted only for `https://sharker-dem.github.io`.
