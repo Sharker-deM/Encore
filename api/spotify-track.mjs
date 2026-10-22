@@ -1,6 +1,7 @@
-import {param,preflight,respond,fail,getJson} from './_shared.mjs';
+import {param,preflight,providerGuard,respond,fail,getJson} from './_shared.mjs';
 export default async function handler(req,res){
  if(preflight(req,res))return;
+ if(await providerGuard(req,res,'spotify-track'))return;
  const id=process.env.SPOTIFY_CLIENT_ID,secret=process.env.SPOTIFY_CLIENT_SECRET;
  if(!id||!secret)return respond(req,res,503,{error:'Spotify Web API is not configured yet. Spotify search links are still available.'});
  const song=param(req,'song',120),artist=param(req,'artist',110);

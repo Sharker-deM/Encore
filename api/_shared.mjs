@@ -1,10 +1,12 @@
+import {verifyBearer} from './_multi-user.mjs';
+import {table} from './_cloud.mjs';
 /** Shared helpers. Files beginning with _ are not deployed as public API routes. */
 const ORIGIN = 'https://sharker-dem.github.io';
 export function respond(req,res,status,payload){
   res.setHeader('Access-Control-Allow-Origin',ORIGIN);
   res.setHeader('Vary','Origin');
   res.setHeader('Access-Control-Allow-Methods','GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers','Content-Type');
+  res.setHeader('Access-Control-Allow-Headers','Authorization, Content-Type');
   res.setHeader('Cache-Control','private, no-store');
   res.setHeader('X-Content-Type-Options','nosniff');
   return res.status(status).json(payload);
@@ -48,3 +50,14 @@ export async function getJson(url,headers={},timeoutMs=8500){
   }
 }
 
+
+/* Expensive public-provider routes require a real Supabase Auth user in v1.9,
+   plus an atomic per-user minute quota in the database. */
+export async function providerGuard(req,res,kind){
+ if(process.env.ENCORE_MULTI_USER_ENABLED!=='true')return false;
+ let uid;try{uid=await verifyBearer(req)}catch{return !!respond(req,res,401,{error:'Sign in to search live concerts.'})}
+ const limits={ticketek:3,ticketmaster:15,'import-event':4,setlists:10,'spotify-track':12};
+ let records;try{records=await table('rpc/encore_reserve_api_call','POST','',{p_uid:uid,p_kind:kind,p_limit:limits[kind]||5})}catch{return !!respond(req,res,503,{error:'Search usage protection temporarily unavailable.'})}
+ if(records!==true)return !!respond(req,res,429,{error:'Too many searches. Please wait a minute.'});
+ return false;
+}

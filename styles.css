@@ -6,3 +6,58 @@
 /* v1.8 subtle settings controls — preserves ENCORE v1.5 styling */
 .toggle-row{display:flex;align-items:center;gap:12px;padding:13px 1px;font-size:13px;color:var(--text);line-height:1.5}
 .toggle-row input{width:19px;height:19px;accent-color:#b38dff;flex:none}
+
+
+/* ENCORE v1.8.1: Safe interaction space for iPhone Home Screen, Dynamic Island,
+   edge-to-edge Safari and landscape display. Keeps the v1.8 visual layout. */
+:root {
+  --encore-top-inset: env(safe-area-inset-top, 0px);
+  --encore-bottom-inset: env(safe-area-inset-bottom, 0px);
+  --encore-left-inset: env(safe-area-inset-left, 0px);
+  --encore-right-inset: env(safe-area-inset-right, 0px);
+}
+html { min-height: 100%; background: var(--bg); }
+body { min-height: 100vh; min-height: 100dvh; }
+.app-shell {
+  padding-top: calc(22px + var(--encore-top-inset));
+  padding-bottom: calc(130px + var(--encore-bottom-inset));
+  padding-left: max(22px, var(--encore-left-inset));
+  padding-right: max(22px, var(--encore-right-inset));
+}
+/* Some installed iOS web apps report zero for safe-area-inset-top.
+   This fallback applies ONLY to installed iOS apps, not normal Safari tabs. */
+body.encore-ios-installed .app-shell {
+  padding-top: calc(12px + max(var(--encore-top-inset), 50px));
+}
+.topbar, .page-head, .detail-top { position: relative; z-index: 1; }
+.top-actions, .top-actions button, .page-head button, .detail-top button { touch-action: manipulation; }
+.iconbtn { min-width: 44px; min-height: 44px; }
+.sheet { max-height: calc(100dvh - max(var(--encore-top-inset), 16px) - 12px); }
+body.encore-ios-installed .sheet {
+  max-height: calc(100dvh - max(var(--encore-top-inset), 50px) - 12px);
+}
+@media (max-width:580px) {
+  .app-shell {
+    padding-top: calc(20px + var(--encore-top-inset));
+    padding-bottom: calc(135px + var(--encore-bottom-inset));
+    padding-left: max(16px, var(--encore-left-inset));
+    padding-right: max(16px, var(--encore-right-inset));
+  }
+  body.encore-ios-installed .app-shell {
+    padding-top: calc(12px + max(var(--encore-top-inset), 50px));
+  }
+}
+
+/* ENCORE v1.9 sign-in privacy gate: no underlying concert UI while unauthenticated. */
+body.account-booting #app,body.account-locked #app {display:none !important}
+body.account-booting #accountBoot {display:block}
+#accountBoot{position:fixed;inset:0;background:#101019;color:#e9d6ff;z-index:150;display:none;place-content:center;text-align:center;padding:30px}
+body.account-locked #accountBoot{display:none}
+.encore-auth-screen{position:fixed;inset:0;overflow:auto;z-index:200;background:#101019;padding:calc(35px + env(safe-area-inset-top)) 18px calc(35px + env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:center}
+.encore-auth-card{width:min(460px,100%);background:#252031;color:#f6edff;border:1px solid #524465;border-radius:22px;padding:25px;box-shadow:0 20px 70px #0007}
+.encore-auth-card h1{margin:10px 0;font-size:36px}.encore-auth-card .accent{color:#d3a4f0}.encore-auth-card .input{margin-top:5px}.encore-auth-card .btn.full{width:100%;margin-top:17px}
+.auth-tabs{display:flex;gap:4px;margin:25px 0 13px;flex-wrap:wrap}.auth-tabs button{flex:1;background:#332a44;color:#cfc0e2;border:0;border-radius:10px;padding:10px 7px;font-size:12px}.auth-tabs .chosen{background:#795c96;color:#fff;font-weight:700}
+.encore-profile-line{display:flex;align-items:center;gap:11px;margin:14px 0}.encore-profile-line strong{display:block}.encore-profile-line small{display:block;font-size:11px;color:#a99aba}
+.encore-avatar{display:inline-flex;width:42px;height:42px;align-items:center;justify-content:center;flex-shrink:0;background:#624976;border-radius:50%;color:#fff;overflow:hidden;font-weight:700}
+.encore-avatar img{width:100%;height:100%;object-fit:cover;display:block}.encore-friend-row{margin:10px 0}
+.navitem{min-width:0}.bottom-nav{justify-content:space-evenly}.bottom-nav .navitem{flex:1}

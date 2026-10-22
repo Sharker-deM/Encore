@@ -1,6 +1,7 @@
-import {param,preflight,respond,fail,getJson} from './_shared.mjs';
+import {param,preflight,providerGuard,respond,fail,getJson} from './_shared.mjs';
 export default async function handler(req,res){
  if(preflight(req,res))return;
+ if(await providerGuard(req,res,'setlists'))return;
  const key=process.env.SETLISTFM_API_KEY;
  if(!key)return respond(req,res,503,{error:'setlist.fm is not configured in Vercel yet.'});
  const artist=param(req,'artist',110);

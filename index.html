@@ -4,9 +4,15 @@
   <meta name="theme-color" content="#101019"><meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="ENCORE">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://challenges.cloudflare.com; connect-src 'self' https://*.supabase.co https://encore-api-ochre.vercel.app https://challenges.cloudflare.com; img-src 'self' https: data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src https://challenges.cloudflare.com; worker-src 'self'; upgrade-insecure-requests">
+  <meta name="referrer" content="no-referrer">
   <meta name="description" content="Your concerts, countdowns, and everything in between.">
   <link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./icon.png">
-  <link rel="icon" href="./icon.svg" type="image/svg+xml"><link rel="stylesheet" href="./styles.css?v=18">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml"><link rel="stylesheet" href="./styles.css?v=190">
   <title>ENCORE — Your concert companion</title>
-</head><body><div id="app"></div><div id="toast" role="status" aria-live="polite"></div>
-<script src="./app.js?v=18" defer></script></body></html>
+</head><body class="account-booting"><div id="accountBoot">Loading your private ENCORE account…</div><div id="app"></div><div id="toast" role="status" aria-live="polite"></div>
+<script src="./boot.js?v=190" defer></script>
+<script src="./account-config.js?v=190"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+<script src="./app.js?v=190" defer></script>
+<script type="module" src="./account.js?v=190"></script></body></html>

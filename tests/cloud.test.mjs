@@ -7,10 +7,10 @@ import pushConfigHandler from '../api/push-config.mjs';
 function makeRes(){return {headers:{},statusCode:200,setHeader(k,v){this.headers[k]=v},status(code){this.statusCode=code;return this},json(data){this.jsonBody=data;return this}}}
 const saved={getItem:k=>process.env[k]};
 test('private cloud rejects uncredentialed fetches',async()=>{
- process.env.ENCORE_SYNC_TOKEN='a'.repeat(64);const req={method:'GET',headers:{},body:null};const res=makeRes();await cloudHandler(req,res);assert.equal(res.statusCode,401);assert.match(res.jsonBody.error,/access code/i);
+ process.env.ENCORE_LEGACY_CLOUD_ENABLED='false';process.env.ENCORE_SYNC_TOKEN='a'.repeat(64);const req={method:'GET',headers:{},body:null};const res=makeRes();await cloudHandler(req,res);assert.equal(res.statusCode,401);assert.match(res.jsonBody.error,/access code/i);
 });
 test('cloud backup GET and PUT roundtrip through mocked Supabase REST',async()=>{
- process.env.ENCORE_SYNC_TOKEN='a'.repeat(64);process.env.SUPABASE_SECRET_KEY='sb_secret_'+'b'.repeat(50);process.env.SUPABASE_URL='https://example.supabase.co';
+ process.env.ENCORE_LEGACY_CLOUD_ENABLED='true';process.env.ENCORE_SYNC_TOKEN='a'.repeat(64);process.env.SUPABASE_SECRET_KEY='sb_secret_'+'b'.repeat(50);process.env.SUPABASE_URL='https://example.supabase.co';
  const fetchOrig=globalThis.fetch;let stored=null,hadAuth=false;
  globalThis.fetch=async(url,opts)=>{
   assert.match(String(url),/https:\/\/example.supabase.co\/rest\/v1\/encore_state/);
@@ -29,7 +29,13 @@ test('cloud backup GET and PUT roundtrip through mocked Supabase REST',async()=>
  }finally{globalThis.fetch=fetchOrig}
 });
 test('alerts require personal code and push config returns only public VAPID key',async()=>{
- process.env.ENCORE_SYNC_TOKEN='a'.repeat(64);process.env.VAPID_PUBLIC_KEY='public-safe';process.env.VAPID_PRIVATE_KEY='private-never-return';
+ process.env.ENCORE_LEGACY_CLOUD_ENABLED='false';process.env.ENCORE_SYNC_TOKEN='a'.repeat(64);process.env.VAPID_PUBLIC_KEY='public-safe';process.env.VAPID_PRIVATE_KEY='private-never-return';
  const denied=makeRes();await alertHandler({method:'GET',headers:{}},denied);assert.equal(denied.statusCode,401);
  const config=makeRes();await pushConfigHandler({method:'GET'},config);assert.equal(config.statusCode,200);assert.equal(config.jsonBody.publicKey,'public-safe');assert.ok(!JSON.stringify(config.jsonBody).includes('private-never-return'));
+});
+
+test('legacy shared access is locked unless migration flag is explicitly enabled',async()=>{
+ process.env.ENCORE_SYNC_TOKEN='a'.repeat(64);delete process.env.ENCORE_LEGACY_CLOUD_ENABLED;
+ const reply=makeRes();await cloudHandler({method:'GET',headers:{authorization:'Bearer '+'a'.repeat(64)}},reply);
+ assert.equal(reply.statusCode,401);
 });

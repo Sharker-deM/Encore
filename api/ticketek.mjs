@@ -1,8 +1,9 @@
-import {param,preflight,respond,fail,getJson} from './_shared.mjs';
+import {param,preflight,providerGuard,respond,fail,getJson} from './_shared.mjs';
 // Ticketek parsing can take longer than direct Ticketmaster API requests.
 export const config = { maxDuration: 40 };
 export default async function handler(req,res){
  if(preflight(req,res))return;
+ if(await providerGuard(req,res,'ticketek'))return;
  const key=process.env.PARSE_API_KEY;
  if(!key)return respond(req,res,503,{error:'Ticketek is not configured in Vercel yet.'});
  const mode=param(req,'mode',12)||'event';

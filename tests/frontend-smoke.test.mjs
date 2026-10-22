@@ -12,14 +12,14 @@ function simulatedApp(){
  vm.runInContext(readFileSync(new URL('../app.js',import.meta.url),'utf8'),context);
  return {context,app,kv};
 }
-test('home and settings render with unchanged navigation and new cloud controls',()=>{
+test('home and settings render with friends route and account controls',()=>{
  const {context,app}=simulatedApp();
  assert.match(app.innerHTML,/YOUR LIVE MUSIC ERA/);
  vm.runInContext("route='settings';render()",context);
- assert.match(app.innerHTML,/Private cloud backup/);
- assert.match(app.innerHTML,/Enable notifications/);
- assert.match(app.innerHTML,/ENCORE v1.8/);
- assert.match(app.innerHTML,/Test connection/);
+ assert.match(app.innerHTML,/Loading secure account/);
+ assert.doesNotMatch(app.innerHTML,/ENCORE_SYNC_TOKEN/);
+ assert.match(app.innerHTML,/ENCORE v1.9/);
+ assert.match(app.innerHTML,/Friends/);
 });
 test('date-only concert, seats and budgets still render',()=>{
  const {context,app}=simulatedApp();
@@ -31,4 +31,16 @@ test('date-only concert, seats and budgets still render',()=>{
  assert.match(app.innerHTML,/Concert savings/);
  vm.runInContext("detailTab='info';render()",context);
  assert.match(app.innerHTML,/Row A/);
+});
+
+test('account mode does not load another user’s or legacy browser data',()=>{
+ const {context,kv,app}=simulatedApp();
+ kv.set('encore-v1',JSON.stringify({concerts:[{id:'private',artist:'Secret concert',date:'2027-01-01'}]}));
+ vm.runInContext('db=loadDB();render()',context);
+ assert.doesNotMatch(app.innerHTML,/Secret concert/);
+ vm.runInContext("window.ENCORE_APPLY_STATE({concerts:[{id:'a',artist:'Account A',date:'2027-01-01'}],settings:{}})",context);
+ assert.match(app.innerHTML,/Account A/);
+ vm.runInContext("window.ENCORE_APPLY_STATE({concerts:[{id:'b',artist:'Account B',date:'2027-01-02'}],settings:{}})",context);
+ assert.match(app.innerHTML,/Account B/);
+ assert.doesNotMatch(app.innerHTML,/Account A/);
 });

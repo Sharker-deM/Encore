@@ -1,4 +1,4 @@
-import {param,preflight,respond,fail,getJson} from './_shared.mjs';
+import {param,preflight,providerGuard,respond,fail,getJson} from './_shared.mjs';
 import {extractEvent} from './_event-import-parser.mjs';
 export const config={maxDuration:30};
 const ALLOWED=new Set([
@@ -27,6 +27,7 @@ async function fetchHtml(url){
 }
 export default async function handler(req,res){
  if(preflight(req,res))return;
+ if(await providerGuard(req,res,'import-event'))return;
  const link=param(req,'url',900),url=parseOfficialUrl(link);
  if(!url)return respond(req,res,400,{error:'Use an HTTPS event link from QPAC, QTIX, Oztix, Moshtix, Eventbrite, Frontier Touring or Live Nation. Ticketmaster and Ticketek links are supported through their own integrations.'});
  try{

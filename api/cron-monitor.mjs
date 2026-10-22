@@ -1,3 +1,4 @@
+import {monitorAllUsers} from './_monitor-v2.mjs';
 import crypto from 'node:crypto';
 import {response,cors,cronAuthorized,getState,table,markOnce,subscriptions,error} from './_cloud.mjs';
 import {sendPush} from './_push.mjs';
@@ -26,4 +27,4 @@ export async function runMonitoring(){
  }catch(err){providerFailures++;}}));}
  return {ok:true,date:today,timezone:LOCAL_ZONE,concerts:concerts.length,checked,providerFailures,foundChanges,notifications,schedule:'daily'};
 }
-export default async function handler(req,res){if(cors(req,res,['GET']))return;if(!cronAuthorized(req))return response(res,401,{error:'Unauthorised scheduled job.'});try{return response(res,200,await runMonitoring())}catch(e){return error(res,e)}}
+export default async function handler(req,res){if(cors(req,res,['GET']))return;if(!cronAuthorized(req))return response(res,401,{error:'Unauthorised scheduled job.'});try{return response(res,200,await (process.env.ENCORE_MULTI_USER_ENABLED==='true'?monitorAllUsers():runMonitoring()))}catch(e){return error(res,e)}}

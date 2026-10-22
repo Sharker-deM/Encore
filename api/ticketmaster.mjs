@@ -1,4 +1,4 @@
-import {param,preflight,respond,fail,getJson} from './_shared.mjs';
+import {param,preflight,providerGuard,respond,fail,getJson} from './_shared.mjs';
 
 // Ticketmaster often uses the venue suburb (Docklands) instead of the metro city (Melbourne).
 // Fallback to countryCode=AU when the exact-city search is sparse; retain multiple tour dates.
@@ -21,6 +21,7 @@ function rankEvents(events,city){
 }
 export default async function handler(req,res){
  if(preflight(req,res))return;
+ if(await providerGuard(req,res,'ticketmaster'))return;
  const key=process.env.TICKETMASTER_API_KEY;
  if(!key)return respond(req,res,503,{error:'Ticketmaster is not configured in Vercel yet.'});
  try{
